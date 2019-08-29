@@ -85,6 +85,7 @@ map<int,map<int,map<int,shared_ptr<variable>>>> color_map;//i:color,j:origin nod
 vector<shared_ptr<master>> vecmaster;
 vector<shared_ptr<slave>> vecslave;
 vector<shared_ptr<connectivity>> veccon;
+map<int,map<int,int>> edge;
 double adfloss;
 double droploss;
 map<int,map<int,shared_ptr<variable>>> loop;
