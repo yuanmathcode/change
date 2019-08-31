@@ -10,12 +10,12 @@
 #include<cstring>
 #include<iomanip>
 #include<algorithm>
-#include "gurobi_c++.h"
 #define M 1000000
+
 using namespace std;
 class master;
 class slave;
-class connectivity;
+//class connectivity;
 
 class master{
 private:
@@ -40,7 +40,7 @@ public:
 		_id=g_id;}
 };
 
-class connectivity{
+/*class connectivity{
 private:
 	shared_ptr<master> _origin;
 	shared_ptr<slave> _end;
@@ -58,8 +58,7 @@ public:
 		_end=g_end;}
 	void define_type(int g_type){
 		_type=g_type;}
-};
-
+};*/
 class variable{
 public:
         int id;
@@ -84,8 +83,8 @@ map<int,map<int,map<int,shared_ptr<variable>>>> color_map;//i:color,j:origin nod
 //map<int,map<int,shared_ptr<variable>>> color_map;
 vector<shared_ptr<master>> vecmaster;
 vector<shared_ptr<slave>> vecslave;
-vector<shared_ptr<connectivity>> veccon;
-map<int,map<int,int>> edge;
+//vector<shared_ptr<connectivity>> veccon;
+map<int,map<int,int>> edge;//edge[i][j]=1 or 2
 double adfloss;
 double droploss;
 map<int,map<int,shared_ptr<variable>>> loop;
@@ -101,19 +100,20 @@ void readfile(const char* filename){
 			while(read>>str_temp){
 				if(str_temp=="end")
 					break;
-			int_temp=stoi(str_temp);
-			shared_ptr<master> master_temp=make_shared<master>(int_temp);
-			vecmaster.push_back(master_temp);
+				int_temp=stoi(str_temp);
+				shared_ptr<master> master_temp=make_shared<master>(int_temp);
+				vecmaster.push_back(master_temp);
 			}
 		}
 		if(str_temp=="Slave"){
 			while(read>>str_temp){
 				if(str_temp=="end")
 					break;
-			int_temp=stoi(str_temp);
-			shared_ptr<slave> slave_temp=make_shared<slave>(int_temp);
-			vecslave.push_back(slave_temp);
+				int_temp=stoi(str_temp);
+				shared_ptr<slave> slave_temp=make_shared<slave>(int_temp);
+				vecslave.push_back(slave_temp);
 			}
+		}
 		//Read connectivity
 		if(str_temp=="Connectivity:"){
 			int index_temp=0;
@@ -125,18 +125,7 @@ void readfile(const char* filename){
 			index_temp++;
 			istringstream connect_record(str_temp);
 			connect_record>>int_temp1>>int_temp2>>int_temp3;
-			shared_ptr<master> master_temp1; 
-			shared_ptr<slave> slave_temp1;
-			for(auto &i:vecmaster){
-				if(i->id()==int_temp1)
-					master_temp1=i;
-			}
-			for(auto &j:vecslave){
-				if(j->id()==int_temp2)
-					slave_temp1=j;
-			}
-			shared_ptr<connectivity> connect_temp=make_shared<connectivity>(master_temp1,slave_temp1,int_temp3);
-			veccon.push_back(connect_temp);
+			edge[int_temp1][int_temp2]=int_temp3;
 			}
 		}
                 if(str_temp=="Adf:"){
@@ -155,8 +144,8 @@ void readfile(const char* filename){
                         	droploss=double_temp;
 			}
                 }
-		
 	}
+}
 /*	for(auto &i:vecnode){
 		set<int> setofend;
 		for(auto &j:vecedge){
@@ -177,8 +166,6 @@ void readfile(const char* filename){
         }
 	
         cout<<endnode.size()<<" "<<endl;*/
-
-}
 
 //define color_map[i][j][h] as binary variable:i means color,j means node;
 void set_color_map(){
